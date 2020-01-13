@@ -1,0 +1,7 @@
+---
+title: "Healthcare"
+date: "1/16/2020"
+output: html_document
+---
+
+**Team Members:** Alvaro Chinchayan, Leighton Li, Andrey Lifar, Yoki Liu, Yue Ping, Sherry Zuo
