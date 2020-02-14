@@ -122,11 +122,9 @@ colnames(Macro)<-tolower(colnames(Macro))
 ```{r}
 names(ESG)
 ```
-
 ```{r}
 names(Macro)
 ```
-
 ```{r}
 colnames(Macro)[2]<-"country_code"
 ```
@@ -134,13 +132,67 @@ colnames(Macro)[2]<-"country_code"
 names(Macro)
 ```
 ```{r}
-capstone_data<-full_join(ESG, Macro, by="country_code")
+ESG2 <- select (ESG,-29)
 ```
 ```{r}
-View(capstone_data)
+names(ESG2)
+```
+```{r}
+Macro2 <- select (Macro,-10:-25)
+names(Macro2)
+```
+```{r}
+Macro2 <- select (Macro2,-34:-39)
+names(Macro2)
+```
+```{r}
+colnames(ESG2)[5:28]<-1996:2019
+names(ESG2)
 ```
 
 ```{r}
-capsonte_data
+Macro3 <- Macro2 %>% gather('year','value',10:33)
+```
+```{r}
+ESG3 <- ESG2 %>% gather('year','value',5:28)
+```
+```{r}
+unique(Macro$country_code)
+```
+```{r}
+unique(ESG3$country_code)
+```
+```{r}
+ESG3 <- ESG3[-126308:-126312,]
+```
+```{r}
+ESG3 <- ESG3 %>% drop_na(series_name)
+```
+
+```{r}
+unique(ESG3$series_name)
+```
+
+```{r}
+names(Macro3)
+```
+```{r}
+Macro4<- select (Macro3,c(2,8,10,11))
+```
+```{r}
+colnames(Macro4)[4]<-'GDP'
+names(Macro4)
+```
+```{r}
+ESG4 <- ESG3 %>% spread(series_name, value)
+```
+```{r}
+final <- left_join(Macro4, ESG4, by = c("country_code" = "country_code", "year" = "year"))
+```
+```{r}
+colnames(final)[2]<-'Scale/GDP'
+```
+```{r}
+colnames(final)
 ```
 
