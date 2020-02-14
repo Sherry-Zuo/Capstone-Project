@@ -195,4 +195,49 @@ colnames(final)[2]<-'Scale/GDP'
 ```{r}
 colnames(final)
 ```
+```{r}
+final<-final%>%filter(year>=2000)
+```
+```{r}
+dim(final)
+```
+```{r}
+names(final)
+```
+```{r}
+data<-read_csv("~/Desktop/version2.csv")
+```
+```{r}
+dim(data)
+```
+```{r}
+names(data)
+```
+```{r}
+data<-data%>%filter(year>=2000)
+```
+```{r}
+skim(data)
+```
+```{r}
+View(final)
+```
+```{r}
+capstone<-final
+```
+```{r}
+dcols <- names(capstone)[7:30]
+capstone[dcols] <- lapply(capstone[dcols], as.numeric)
+```
+```{r}
+any(is.na(capstone))
+complete.cases(capstone)
+```
+```{r}
+capstone<-capstone%>%select(-'Data from database: Environment Social and Governance (ESG) Data',-'Last Updated: 01/14/2020')
+```
+
+```{r}
+##dat1 <- dat[ , !(names(dat) %in% c("MWD", "VIS", "TIDE"))]
+```
 
