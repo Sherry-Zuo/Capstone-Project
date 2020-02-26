@@ -241,3 +241,6 @@ capstone<-capstone%>%select(-'Data from database: Environment Social and Governa
 ##dat1 <- dat[ , !(names(dat) %in% c("MWD", "VIS", "TIDE"))]
 ```
 
+
+
+
