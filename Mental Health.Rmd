@@ -49,7 +49,7 @@ skim(data)
 ```
 ```{r}
 #rename columns
-names(data2014)[5:27]<-c("state","self_employed","family_history","awareness_of_treatment", "interfere","company_size","remote","tech_company","mh_benefits","awareness_mh_benefits","mh_discuss","mh_resources", "anonymity_protected", "medical_leave_easy","mh_negative_consequence_flag","ph_negative_consequence_flag","mh_disscuss_coworker","mh_disscuss_supervisor","interview_mh_bringup", "interview_ph_bringup","mh_serious_ph","witness_mh_nc","comments")
+names(data2014)[5:27]<-c("state","self_employed","family_history","mh_treatment", "interfere","company_size","remote","tech_company","mh_benefits","awareness_mh_benefits","mh_discuss","mh_resources", "anonymity_protected", "medical_leave_easy","mh_negative_consequence_flag","ph_negative_consequence_flag","mh_disscuss_coworker","mh_disscuss_supervisor","interview_mh_bringup", "interview_ph_bringup","mh_serious_ph","witness_mh_nc","comments")
 ```
 ```{r}
 skim(data2014)
@@ -175,22 +175,22 @@ pie(family_history_count,labels = family_history_percentage, col=rainbow(length(
 ```
 ```{r}
 #Our outcome varaible
-d=table(maindata$awareness_of_treatment)
+d=table(maindata$mh_treatment)
 d
 ```
 ```{r}
 str(d)
-awareness_of_treatment_count<-as.vector(d)
-awareness_of_treatment_percentage<-names(d)
-awareness_of_treatment_count
-awareness_of_treatment_percentage
+mh_treatment_count<-as.vector(d)
+mh_treatment_percentage<-names(d)
+mh_treatment_count
+mh_treatment_percentage
 ```
 ```{r}
-pct4 <- round(awareness_of_treatment_count/sum(awareness_of_treatment_count)*100)
-awareness_of_treatment_percentage <- paste(awareness_of_treatment_percentage, pct4) # add percents to labels
-awareness_of_treatment_percentage <- paste(awareness_of_treatment_percentage,"%",sep="") # ad % to labels
-pie(awareness_of_treatment_count,labels = awareness_of_treatment_percentage, col=rainbow(length(awareness_of_treatment_percentage)),
-   main="Pie Chart of Awareness of Treatment")
+pct4 <- round(mh_treatment_count/sum(mh_treatment_count)*100)
+mh_treatment_percentage <- paste(mh_treatment_percentage, pct4) # add percents to labels
+mh_treatment_percentage <- paste(mh_treatment_percentage,"%",sep="") # ad % to labels
+pie(mh_treatment_count,labels = mh_treatment_percentage, col=rainbow(length(mh_treatment_percentage)),
+   main="Pie Chart of Whether seeking Mental Health Treatment")
 ```
 ```{r}
 e=table(maindata$interfere)
