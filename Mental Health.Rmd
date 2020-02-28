@@ -8,11 +8,11 @@ output:
     latex_engine: xelatex
 ---
 
-Our main goal is to answer questions for:  
-What's the overview of people's mental health problem?   
-Can you predict whether a patient should be treated of his/her mental illness or not according to the value obtained based on our data?   
-Is there a correlation between mental health and whether job lets them take them break/ alow them to work from home/remote worker?  
-What can we get for the tweets data?   
+Our main goal is to answer questions for:    
+What's the overview of people's mental health problem?     
+Can you predict whether a patient should be treated of his/her mental illness or not according to the value obtained based on our data?     
+Is there a correlation between mental health and whether job lets them take them break/ alow them to work from home/remote worker?    
+What can we get for the tweets data?     
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(knitr)
@@ -30,14 +30,15 @@ Our first part will focus on the [OSMI Mental Health in Tech Surveys data](https
 We merged 2016-2019 data into a new dataset by python, more code could see in the Mental_Health.ipynb file. We will use the merged dataset "mental_health" to do an overview of the mental illness    
 We will do supervised machine learning focus on the year 2014 data  
 
-***
+
 Data Loading  
 ```{r}
 #import data
 data<-read_csv("~/Desktop/mental_health.csv")
 data2014<-read_csv("~/Desktop/2014.csv")
 ```
-***
+
+
 Data Cleaning
 ```{r}
 #remove first column since it's just the numbers of row
@@ -191,6 +192,327 @@ awareness_of_treatment_percentage <- paste(awareness_of_treatment_percentage,"%"
 pie(awareness_of_treatment_count,labels = awareness_of_treatment_percentage, col=rainbow(length(awareness_of_treatment_percentage)),
    main="Pie Chart of Awareness of Treatment")
 ```
-
-
-
+```{r}
+e=table(maindata$interfere)
+e
+```
+```{r}
+str(e)
+interfere_count<-as.vector(e)
+interfere_percentage<-names(e)
+interfere_count
+interfere_percentage
+```
+```{r}
+pct5 <- round(interfere_count/sum(interfere_count)*100)
+interfere_percentage <- paste(interfere_percentage, pct5) # add percents to labels
+interfere_percentage <- paste(interfere_percentage,"%",sep="") # ad % to labels
+pie(interfere_count,labels = interfere_percentage, col=rainbow(length(interfere_percentage)),
+   main="Pie Chart of Interfere")
+```
+```{r}
+f=table(maindata$company_size)
+f
+```
+```{r}
+str(f)
+company_size_count<-as.vector(f)
+company_size_percentage<-names(f)
+company_size_count
+company_size_percentage
+```
+```{r}
+pct6 <- round(company_size_count/sum(company_size_count)*100)
+company_size_percentage <- paste(company_size_percentage, pct6) # add percents to labels
+company_size_percentage <- paste(company_size_percentage,"%",sep="") # ad % to labels
+pie(company_size_count,labels = company_size_percentage, col=rainbow(length(company_size_percentage)),
+   main="Pie Chart of Company Size")
+```
+```{r}
+g=table(maindata$remote)
+g
+```
+```{r}
+str(g)
+remote_count<-as.vector(g)
+remote_percentage<-names(g)
+remote_count
+remote_percentage
+```
+```{r}
+pct7 <- round(remote_count/sum(remote_count)*100)
+remote_percentage <- paste(remote_percentage, pct7) # add percents to labels
+remote_percentage <- paste(remote_percentage,"%",sep="") # ad % to labels
+pie(remote_count,labels = remote_percentage, col=rainbow(length(remote_percentage)),
+   main="Pie Chart of Remote")
+```
+```{r}
+h=table(maindata$tech_company)
+h
+```
+```{r}
+str(h)
+tech_company_count<-as.vector(h)
+tech_company_percentage<-names(h)
+tech_company_count
+tech_company_percentage
+```
+```{r}
+pct8 <- round(tech_company_count/sum(tech_company_count)*100)
+tech_company_percentage <- paste(tech_company_percentage, pct8) # add percents to labels
+tech_company_percentage <- paste(tech_company_percentage,"%",sep="") # ad % to labels
+pie(tech_company_count,labels = tech_company_percentage, col=rainbow(length(tech_company_percentage)),
+   main="Pie Chart of Tech Company")
+```
+```{r}
+i=table(maindata$mh_benefits)
+i
+```
+```{r}
+str(i)
+mh_benefits_count<-as.vector(i)
+mh_benefits_percentage<-names(i)
+mh_benefits_count
+mh_benefits_percentage
+```
+```{r}
+pct9 <- round(mh_benefits_count/sum(mh_benefits_count)*100)
+mh_benefits_percentage <- paste(mh_benefits_percentage, pct9) # add percents to labels
+mh_benefits_percentage <- paste(mh_benefits_percentage,"%",sep="") # ad % to labels
+pie(mh_benefits_count,labels = mh_benefits_percentage, col=rainbow(length(mh_benefits_percentage)),
+   main="Pie Chart of Mental Health Benefits")
+```
+```{r}
+j=table(maindata$awareness_mh_benefits)
+j
+```
+```{r}
+str(j)
+awareness_mh_benefits_count<-as.vector(j)
+awareness_mh_benefits_percentage<-names(j)
+awareness_mh_benefits_count
+awareness_mh_benefits_percentage
+```
+```{r}
+pct10 <- round(awareness_mh_benefits_count/sum(awareness_mh_benefits_count)*100)
+awareness_mh_benefits_percentage <- paste(awareness_mh_benefits_percentage, pct10) # add percents to labels
+awareness_mh_benefits_percentage <- paste(awareness_mh_benefits_percentage,"%",sep="") # ad % to labels
+pie(awareness_mh_benefits_count,labels = awareness_mh_benefits_percentage, col=rainbow(length(awareness_mh_benefits_percentage)),
+   main="Pie Chart of Awarenessof Mental Health Benefits")
+```
+```{r}
+k=table(maindata$mh_discuss)
+k
+```
+```{r}
+str(k)
+mh_discuss_count<-as.vector(k)
+mh_discuss_percentage<-names(k)
+mh_discuss_count
+mh_discuss_percentage
+```
+```{r}
+pct11 <- round(mh_discuss_count/sum(mh_discuss_count)*100)
+mh_discuss_percentage <- paste(mh_discuss_percentage, pct11) # add percents to labels
+mh_discuss_percentage <- paste(mh_discuss_percentage,"%",sep="") # ad % to labels
+pie(mh_discuss_count,labels = mh_discuss_percentage, col=rainbow(length(mh_discuss_percentage)),
+   main="Pie Chart of Mental Health Discussion")
+```
+```{r}
+l=table(maindata$mh_resources)
+l
+```
+```{r}
+str(l)
+mh_resources_count<-as.vector(l)
+mh_resources_percentage<-names(l)
+mh_resources_count
+mh_resources_percentage
+```
+```{r}
+pct12 <- round(mh_resources_count/sum(mh_resources_count)*100)
+mh_resources_percentage <- paste(mh_resources_percentage, pct12) # add percents to labels
+mh_resources_percentage <- paste(mh_resources_percentage,"%",sep="") # ad % to labels
+pie(mh_resources_count,labels = mh_resources_percentage, col=rainbow(length(mh_resources_percentage)),
+   main="Pie Chart of Mental Health Resources")
+```
+```{r}
+m=table(maindata$anonymity_protected)
+m
+```
+```{r}
+str(m)
+anonymity_protected_count<-as.vector(m)
+anonymity_protected_percentage<-names(m)
+anonymity_protected_count
+anonymity_protected_percentage
+```
+```{r}
+pct13 <- round(anonymity_protected_count/sum(anonymity_protected_count)*100)
+anonymity_protected_percentage <- paste(anonymity_protected_percentage, pct13) # add percents to labels
+anonymity_protected_percentage <- paste(anonymity_protected_percentage,"%",sep="") # ad % to labels
+pie(anonymity_protected_count,labels = anonymity_protected_percentage, col=rainbow(length(anonymity_protected_percentage)),
+   main="Pie Chart of Anonymity Mental Health Protection")
+```
+```{r}
+n=table(maindata$medical_leave_easy)
+n
+```
+```{r}
+str(n)
+medical_leave_easy_count<-as.vector(n)
+medical_leave_easy_percentage<-names(n)
+medical_leave_easy_count
+medical_leave_easy_percentage
+```
+```{r}
+pct14 <- round(medical_leave_easy_count/sum(medical_leave_easy_count)*100)
+medical_leave_easy_percentage <- paste(medical_leave_easy_percentage, pct14) # add percents to labels
+medical_leave_easy_percentage <- paste(medical_leave_easy_percentage,"%",sep="") # ad % to labels
+pie(medical_leave_easy_count,labels = medical_leave_easy_percentage, col=rainbow(length(medical_leave_easy_percentage)),
+   main="Pie Chart of Whether Medical Leave Easy")
+```
+```{r}
+o=table(maindata$mh_negative_consequence_flag)
+o
+```
+```{r}
+str(o)
+mh_negative_consequence_count<-as.vector(o)
+mh_negative_consequence_percentage<-names(o)
+mh_negative_consequence_count
+mh_negative_consequence_percentage
+```
+```{r}
+pct15 <- round(mh_negative_consequence_count/sum(mh_negative_consequence_count)*100)
+mh_negative_consequence_percentage <- paste(mh_negative_consequence_percentage, pct15) # add percents to labels
+mh_negative_consequence_percentage <- paste(mh_negative_consequence_percentage,"%",sep="") # ad % to labels
+pie(mh_negative_consequence_count,labels = mh_negative_consequence_percentage, col=rainbow(length(mh_negative_consequence_percentage)),
+   main="Whether Mental Health have Negative Consequence for Interview")
+```
+```{r}
+p=table(maindata$ph_negative_consequence_flag)
+p
+```
+```{r}
+str(p)
+ph_negative_consequence_flag_count<-as.vector(p)
+ph_negative_consequence_flag_percentage<-names(p)
+ph_negative_consequence_flag_count
+ph_negative_consequence_flag_percentage
+```
+```{r}
+pct16 <- round(ph_negative_consequence_flag_count/sum(ph_negative_consequence_flag_count)*100)
+ph_negative_consequence_flag_percentage <- paste(ph_negative_consequence_flag_percentage, pct16) # add percents to labels
+ph_negative_consequence_flag_percentage <- paste(ph_negative_consequence_flag_percentage,"%",sep="") # ad % to labels
+pie(ph_negative_consequence_flag_count,labels = ph_negative_consequence_flag_percentage, col=rainbow(length(mh_negative_consequence_percentage)),
+   main="Whether Physical Health have Negative Consequence for Interview")
+```
+```{r}
+q=table(maindata$mh_disscuss_coworker)
+q
+```
+```{r}
+str(q)
+mh_disscuss_coworker_count<-as.vector(q)
+mh_disscuss_coworker_percentage<-names(q)
+mh_disscuss_coworker_count
+mh_disscuss_coworker_percentage
+```
+```{r}
+pct17 <- round(mh_disscuss_coworker_count/sum(mh_disscuss_coworker_count)*100)
+mh_disscuss_coworker_percentage <- paste(mh_disscuss_coworker_percentage, pct17) # add percents to labels
+mh_disscuss_coworker_percentage <- paste(mh_disscuss_coworker_percentage,"%",sep="") # ad % to labels
+pie(mh_disscuss_coworker_count,labels = mh_disscuss_coworker_percentage, col=rainbow(length(mh_disscuss_coworker_percentage)),
+   main="Whether Disscuss Mental Health with Coworker")
+```
+```{r}
+r=table(maindata$mh_disscuss_supervisor)
+r
+```
+```{r}
+str(r)
+mh_disscuss_supervisor_count<-as.vector(r)
+mh_disscuss_supervisor_percentage<-names(r)
+mh_disscuss_supervisor_count
+mh_disscuss_supervisor_percentage
+```
+```{r}
+pct18 <- round(mh_disscuss_supervisor_count/sum(mh_disscuss_supervisor_count)*100)
+mh_disscuss_supervisor_percentage <- paste(mh_disscuss_supervisor_percentage, pct18) # add percents to labels
+mh_disscuss_supervisor_percentage <- paste(mh_disscuss_supervisor_percentage,"%",sep="") # ad % to labels
+pie(mh_disscuss_supervisor_count,labels = mh_disscuss_supervisor_percentage, col=rainbow(length(mh_disscuss_supervisor_percentage)),
+   main="Whether Disscuss Mental Health with Supervisor")
+```
+```{r}
+s=table(maindata$interview_mh_bringup)
+s
+```
+```{r}
+str(s)
+interview_mh_bringup_count<-as.vector(s)
+interview_mh_bringup_percentage<-names(s)
+interview_mh_bringup_count
+interview_mh_bringup_percentage
+```
+```{r}
+pct19 <- round(interview_mh_bringup_count/sum(interview_mh_bringup_count)*100)
+interview_mh_bringup_percentage <- paste(interview_mh_bringup_percentage, pct19) # add percents to labels
+interview_mh_bringup_percentage <- paste(interview_mh_bringup_percentage,"%",sep="") # ad % to labels
+pie(interview_mh_bringup_count,labels = interview_mh_bringup_percentage, col=rainbow(length(interview_mh_bringup_percentage)),
+   main="Whether Bring Up Mental Health into Interview")
+```
+```{r}
+t=table(maindata$interview_ph_bringup)
+t
+```
+```{r}
+str(t)
+interview_ph_bringup_count<-as.vector(t)
+interview_ph_bringup_percentage<-names(t)
+interview_ph_bringup_count
+interview_ph_bringup_percentage
+```
+```{r}
+pct20 <- round(interview_ph_bringup_count/sum(interview_ph_bringup_count)*100)
+interview_ph_bringup_percentage <- paste(interview_ph_bringup_percentage, pct20) # add percents to labels
+interview_ph_bringup_percentage <- paste(interview_ph_bringup_percentage,"%",sep="") # ad % to labels
+pie(interview_ph_bringup_count,labels = interview_ph_bringup_percentage, col=rainbow(length(interview_ph_bringup_percentage)),
+   main="Whether Disscuss Physical Health with Coworker")
+```
+```{r}
+u=table(maindata$mh_serious_ph)
+u
+```
+```{r}
+str(u)
+mh_serious_ph_count<-as.vector(u)
+mh_serious_ph_percentage<-names(u)
+mh_serious_ph_count
+mh_serious_ph_percentage
+```
+```{r}
+pct21 <- round(mh_serious_ph_count/sum(mh_serious_ph_count)*100)
+mh_serious_ph_percentage <- paste(mh_serious_ph_percentage, pct21) # add percents to labels
+mh_serious_ph_percentage <- paste(mh_serious_ph_percentage,"%",sep="") # ad % to labels
+pie(mh_serious_ph_count,labels = mh_serious_ph_percentage, col=rainbow(length(mh_serious_ph_percentage)),
+   main="Mental Health vs. Physical Health")
+```
+```{r}
+v=table(maindata$witness_mh_nc)
+v
+```
+```{r}
+str(v)
+witness_mh_nc_count<-as.vector(v)
+witness_mh_nc_percentage<-names(v)
+witness_mh_nc_count
+witness_mh_nc_percentage
+```
+```{r}
+pct22 <- round(witness_mh_nc_count/sum(witness_mh_nc_count)*100)
+witness_mh_nc_percentage <- paste(witness_mh_nc_percentage, pct22) # add percents to labels
+witness_mh_nc_percentage <- paste(witness_mh_nc_percentage,"%",sep="") # ad % to labels
+pie(witness_mh_nc_count,labels = witness_mh_nc_percentage, col=rainbow(length(witness_mh_nc_percentage)),
+   main="Whether Witness the Mental Health Negative Consequence")
+```
