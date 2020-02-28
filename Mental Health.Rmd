@@ -55,31 +55,40 @@ skim(data2014)
 ```
 ```{r}
 #make a copy of our data
-data2<-data2014
+maindata<-data2014
 #drop variables "Timestamp", “Country”, “comments” just to make our lives easier.
-data2<-subset(data2, select = -c(1,4,27))
+maindata<-subset(maindata, select = -c(1,4,27))
 ```
 ```{r}
-names(data2)[1:2]<-c("age","gender")
+names(maindata)[1:2]<-c("age","gender")
 ```
 ```{r}
-data.table(data2)
+data.table(maindata)
 ```
 
 ```{r}
-skim(data2)
+skim(maindata)
 ```
 ```{r}
 #make word into lowercases in column gender
-data2$gender<-str_to_lower(data2$gender)
+maindata$gender<-str_to_lower(maindata$gender)
 #build gender group
 male_str = c("male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man","msle", "mail", "malr","cis man", "Cis Male", "cis male")
 trans_str = c("trans-female", "something kinda male?", "queer/she/they", "non-binary","nah", "all", "enby", "fluid", "genderqueer", "androgyne", "agender", "male leaning androgynous", "guy (-ish) ^_^", "trans woman", "neuter", "female (trans)", "queer", "ostensibly male, unsure what that really means")          
 female_str = c("cis female", "f", "female", "woman",  "femake", "female ","cis-female/femme", "female (cis)", "femail")
 #replace details
-data2$gender <- str_replace_all(data2$gender,male_str,"M") 
-data2$gender <- str_replace_all(data2$gender,trans_str,"T")
-data2$gender <- str_replace_all(data2$gender,female_str,"F")
+maindata$gender <- ifelse(maindata$gender %in% male_str, "M",ifelse(maindata$gender %in% female_str,"F",ifelse(maindata$gender %in% trans_str,"T",NA)))
+```
+```{r}
+#we want to focus on the US
+maindata<-maindata[!is.na(maindata$state),]
+```
+```{r}
+skim(maindata)
+```
+```{r}
+#remove all NAs
+maindata<-na.omit(maindata)
 ```
 
 
