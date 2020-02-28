@@ -84,11 +84,113 @@ maindata$gender <- ifelse(maindata$gender %in% male_str, "M",ifelse(maindata$gen
 maindata<-maindata[!is.na(maindata$state),]
 ```
 ```{r}
+#remove other NAs
+maindata<-na.omit(maindata)
+```
+```{r}
 skim(maindata)
 ```
 ```{r}
-#remove all NAs
-maindata<-na.omit(maindata)
+#there is one person list 329, so delete this row
+maindata<-maindata[maindata$age!=329,]
 ```
+```{r}
+names(maindata)
+```
+
+```{r}
+maindata%>%
+  ggplot(aes(x=age))+
+  geom_bar(fill="red")+
+  labs(title="Age Distribution", x="Age", y="Number of People")+
+  theme(panel.background = element_rect(fill="transparent"),
+        axis.line = element_line(colour = "black"))
+# maindata%>%
+#   group_by(age)%>%
+#   tally() %>%
+#   ggplot(aes(x=age,y = n))+
+#   geom_bar(stat = 'identity', fill="red")+
+#   labs(title="Age Distribution", x="Age", y="Number of People")+
+#   theme(panel.background = element_rect(fill="transparent"), 
+#         axis.line = element_line(colour = "black")) +
+#   geom_text(aes(label = n))
+```
+```{r}
+a=table(maindata$gender)
+a
+```
+```{r}
+str(a)
+gender_count<-as.vector(a)
+gender_percentage<-c("Female","Male","Transgender")
+gender_count
+gender_percentage
+```
+```{r}
+pct1 <- round(gender_count/sum(gender_count)*100)
+gender_percentage <- paste(gender_percentage, pct1) # add percents to labels
+gender_percentage <- paste(gender_percentage,"%",sep="") # ad % to labels
+pie(gender_count,labels = gender_percentage, col=rainbow(length(gender_percentage)),
+   main="Pie Chart of Gender")
+```
+```{r}
+#state could make a map, still considering
+```
+```{r}
+b=table(maindata$self_employed)
+b
+```
+```{r}
+str(b)
+self_employed_count<-as.vector(b)
+self_employed_percentage<-names(b)
+self_employed_count
+self_employed_percentage
+```
+```{r}
+pct2 <- round(self_employed_count/sum(self_employed_count)*100)
+self_employed_percentage <- paste(self_employed_percentage, pct2) # add percents to labels
+self_employed_percentage <- paste(self_employed_percentage,"%",sep="") # ad % to labels
+pie(self_employed_count,labels = self_employed_percentage, col=rainbow(length(self_employed_percentage)),
+   main="Pie Chart of Self_Employed")
+```
+```{r}
+c=table(maindata$family_history)
+c
+```
+```{r}
+str(c)
+family_history_count<-as.vector(c)
+family_history_percentage<-names(c)
+family_history_count
+family_history_percentage
+```
+```{r}
+pct3 <- round(family_history_count/sum(family_history_count)*100)
+family_history_percentage <- paste(family_history_percentage, pct3) # add percents to labels
+family_history_percentage <- paste(family_history_percentage,"%",sep="") # ad % to labels
+pie(family_history_count,labels = family_history_percentage, col=rainbow(length(family_history_percentage)),
+   main="Pie Chart of Family History of Mental Health")
+```
+```{r}
+#Our outcome varaible
+d=table(maindata$awareness_of_treatment)
+d
+```
+```{r}
+str(d)
+awareness_of_treatment_count<-as.vector(d)
+awareness_of_treatment_percentage<-names(d)
+awareness_of_treatment_count
+awareness_of_treatment_percentage
+```
+```{r}
+pct4 <- round(awareness_of_treatment_count/sum(awareness_of_treatment_count)*100)
+awareness_of_treatment_percentage <- paste(awareness_of_treatment_percentage, pct4) # add percents to labels
+awareness_of_treatment_percentage <- paste(awareness_of_treatment_percentage,"%",sep="") # ad % to labels
+pie(awareness_of_treatment_count,labels = awareness_of_treatment_percentage, col=rainbow(length(awareness_of_treatment_percentage)),
+   main="Pie Chart of Awareness of Treatment")
+```
+
 
 
