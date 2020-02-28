@@ -445,12 +445,10 @@ mh_disscuss_supervisor_percentage <- paste(mh_disscuss_supervisor_percentage,"%"
 pie(mh_disscuss_supervisor_count,labels = mh_disscuss_supervisor_percentage, col=rainbow(length(mh_disscuss_supervisor_percentage)),
    main="Whether Disscuss Mental Health with Supervisor")
 ```
-
 ```{r}
 s=table(maindata$interview_mh_bringup)
 s
 ```
-
 ```{r}
 str(s)
 interview_mh_bringup_count<-as.vector(s)
@@ -458,7 +456,6 @@ interview_mh_bringup_percentage<-names(s)
 interview_mh_bringup_count
 interview_mh_bringup_percentage
 ```
-
 ```{r}
 pct19 <- round(interview_mh_bringup_count/sum(interview_mh_bringup_count)*100)
 interview_mh_bringup_percentage <- paste(interview_mh_bringup_percentage, pct19) # add percents to labels
@@ -466,12 +463,10 @@ interview_mh_bringup_percentage <- paste(interview_mh_bringup_percentage,"%",sep
 pie(interview_mh_bringup_count,labels = interview_mh_bringup_percentage, col=rainbow(length(interview_mh_bringup_percentage)),
    main="Whether Bring Up Mental Health into Interview")
 ```
-
 ```{r}
 t=table(maindata$interview_ph_bringup)
 t
 ```
-
 ```{r}
 str(t)
 interview_ph_bringup_count<-as.vector(t)
@@ -479,7 +474,6 @@ interview_ph_bringup_percentage<-names(t)
 interview_ph_bringup_count
 interview_ph_bringup_percentage
 ```
-
 ```{r}
 pct20 <- round(interview_ph_bringup_count/sum(interview_ph_bringup_count)*100)
 interview_ph_bringup_percentage <- paste(interview_ph_bringup_percentage, pct20) # add percents to labels
@@ -487,7 +481,6 @@ interview_ph_bringup_percentage <- paste(interview_ph_bringup_percentage,"%",sep
 pie(interview_ph_bringup_count,labels = interview_ph_bringup_percentage, col=rainbow(length(interview_ph_bringup_percentage)),
    main="Whether Disscuss Physical Health with Coworker")
 ```
-
 ```{r}
 u=table(maindata$mh_serious_ph)
 u
@@ -499,7 +492,6 @@ mh_serious_ph_percentage<-names(u)
 mh_serious_ph_count
 mh_serious_ph_percentage
 ```
-
 ```{r}
 pct21 <- round(mh_serious_ph_count/sum(mh_serious_ph_count)*100)
 mh_serious_ph_percentage <- paste(mh_serious_ph_percentage, pct21) # add percents to labels
@@ -576,21 +568,28 @@ dummydata$witness_mh_nc<-ifelse(dummydata$witness_mh_nc=="Yes", 1,0)
 ```{r}
 skim(dummydata)
 ```
-
 ```{r}
 #use this for some variable include "I don't know" or "Not sure" and for variable "gender"
 dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph"))
 ```
 ```{r}
+#after adding dummies, remove original categorical variables
 dummydata <- dummydata[-c(2,11:17,23)]
 ```
 ```{r}
+#We would try with state dummys or delete state when we do linear regression
+dummydata<-dummy_cols(dummydata, select_columns = c("state"))
+```
+```{r}
+#leave numeric variables and all dummies with state as dummies
+dummydata<-dummydata[-2]
+dim(dummydata)
 names(dummydata)
 ```
 ```{r}
-dim(dummydata)
-```
-```{r}
-length(unique(dummydata$state))
+#leave numeric variables and all dummies with state as dummies
+dummydata2<-dummydata[-c(41:83)]
+dim(dummydata2)
+names(dummydata2)
 ```
 
