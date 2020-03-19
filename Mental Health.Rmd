@@ -592,4 +592,24 @@ dummydata2<-dummydata[-c(41:83)]
 dim(dummydata2)
 names(dummydata2)
 ```
+```{r}
+maindata2<-maindata
+```
+```{r}
+northeast <- c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA")
 
+midwest <- c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD")
+
+south <- c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR")
+
+west <- c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY", "AK", "CA", "HI", "OR", "WA")
+
+regions<- as.list(northeast, midwest, south, west)
+
+maindata2$region <- ifelse(maindata2$state %in% c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA"), "NorthEast",
+                           ifelse(maindata2$state %in% c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD"),"MidWest",
+                                  ifelse(maindata2$state %in% c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR"), "South",
+                                         ifelse(maindata2$state %in% c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY","AK", "CA", "HI", "OR", "WA"), "West", NA))))
+
+
+table(maindata2$region)
