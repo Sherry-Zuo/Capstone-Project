@@ -26,6 +26,21 @@ library(rtweet)
 library(tidytext)
 library(maps)
 library(fastDummies)
+library(corrplot)
+library(tidyr)
+library(magrittr)
+library(ggthemes)
+library(glmnet)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(gbm)
+theme_set(theme_bw())
+library(caret)
+library(leaps)
+library(ggvis)
+library(dvmisc)
 ```
 Our first part will focus on the [OSMI Mental Health in Tech Surveys data](https://osmihelp.org/research)  
 We merged 2016-2019 data into a new dataset by python, more code could see in the Mental_Health.ipynb file. We will use the merged dataset "mental_health" to do an overview of the mental illness    
@@ -541,6 +556,10 @@ regions_percentage <- paste(regions_percentage,"%",sep="") # ad % to labels
 pie(regions_count,labels = regions_percentage, col=rainbow(length(regions_percentage)),
    main="Pie Chart of Regions")
 ```
+```{r}
+#remove state variable since we want to use regions
+maindata<-maindata[-3]
+```
 
 ***
 
@@ -599,9 +618,9 @@ skim(dummydata)
 dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph","region"))
 ```
 ```{r}
-#after adding dummies, remove original categorical variables and state variable
+#after adding dummies, remove original categorical variables
 #leave numeric variables
-dummydata <- dummydata[-c(2:3,11:17,23,25)]
+dummydata <- dummydata[-c(2,11:17,23,25)]
 ```
 ```{r}
 dim(dummydata)
@@ -614,3 +633,378 @@ skim(dummydata)
 ***
 
 Model Choosing 
+```{r fig.width=12, fig.height=12}
+#Correlation Matrix
+mh_c<-cor(dummydata)
+corrplot(mh_c,
+         type="upper",
+         diag=F,
+         method="color",
+         order="hclust")
+```
+Split Dataset    
+```{r}
+set.seed(666)
+# assign 118 random rows to the test set(around 30% of our dataset)
+test_index <- sample(nrow(dummydata), 176) 
+# now split
+dummydata.test <- dummydata[test_index,]
+dummydata.train <- dummydata[-test_index,]
+```
+
+Linear Regression 
+**Preparation**
+```{r}
+# Intercept
+intercept <- lm(mh_treatment ~ 1, data=dummydata.train)
+summary(intercept)
+```
+```{r}
+get_mse(intercept, var.estimate = FALSE)
+```
+```{r}
+intercept.test <- lm(mh_treatment ~1, data = dummydata.test)
+```
+```{r}
+get_mse(intercept.test, var.estimate = FALSE)
+```
+```{r echo=T, results='hide'}
+# Fit the full model 
+full.model <- lm(mh_treatment ~., data = dummydata.train)
+summary(full.model)
+```
+```{r}
+get_mse(full.model, var.estimate = FALSE)
+```
+```{r}
+full.model.test <- lm(mh_treatment ~., data = dummydata.test)
+```
+```{r}
+get_mse(full.model.test, var.estimate = FALSE)
+```
+
+Stepwise Regression
+**Forward Selection** 
+```{r echo=T, results='hide'}
+forward.model <- stepAIC(intercept, direction = "forward", scope=list(upper=full.model, lower=intercept))
+```
+```{r}
+forward.model$anova
+```
+```{r}
+get_mse(forward.model)
+```
+```{r}
+AIC <- as.data.frame(forward.model$anova$AIC)
+names(AIC) <- "AIC"
+AIC %>% 
+    ggvis(x=~ c(1:11), y=~AIC) %>%
+    layer_points(fill = ~ AIC) %>%
+    add_axis("y", title = "AIC") %>% 
+    add_axis("x", title = "Number of variables")
+```
+```{r}
+yhat_test_forward <- predict(forward.model,dummydata.test)
+```
+```{r}
+mse_test_forward <- mean((dummydata.test$mh_treatment-yhat_test_forward)^2)
+mse_test_forward
+```
+
+**Backward Selection**
+```{r echo=T, results='hide'}
+backward.model <- stepAIC(full.model, direction = "backward")
+```
+```{r}
+backward.model$anova
+```
+```{r}
+get_mse(backward.model)
+```
+```{r}
+AIC2 <- as.data.frame(backward.model$anova$AIC)
+names(AIC2) <- "AIC2"
+AIC2 %>% 
+    ggvis(x=~ c(1:32), y=~AIC2 ) %>%
+    layer_points(fill = ~ desc(AIC2)) %>%
+    add_axis("y", title = "AIC") %>% 
+    add_axis("x", title = "Number of variables eliminated")
+```
+```{r}
+yhat_test_backward <- predict(backward.model,dummydata.test)
+```
+```{r}
+mse_test_backward <- mean((dummydata.test$mh_treatment-yhat_test_backward)^2)
+mse_test_backward
+```
+
+***
+
+##### Penalized regression
+```{r}
+x_data <- model.matrix( ~ -1 + . -mh_treatment, dummydata)
+x_train <- x_data[-test_index, ]
+y_train <- dummydata$mh_treatment[-test_index]
+x_test <- x_data[test_index, ]
+y_test <- dummydata$mh_treatment[test_index]
+```
+**Ridge regression**    
+```{r}
+fit_ridge <- cv.glmnet(x_train, y_train, alpha = 0, nfolds = 10)
+```
+```{r}
+yhat_train_ridge <- predict(fit_ridge, x_train, s = fit_ridge$lambda.min) 
+mse_train_ridge <- mean((y_train - yhat_train_ridge)^2)
+mse_train_ridge
+```
+```{r}
+yhat_test_ridge <- predict(fit_ridge, x_test, s = fit_ridge$lambda.min) 
+mse_test_ridge <- mean((y_test - yhat_test_ridge)^2)
+mse_test_ridge
+```
+```{r}
+# Plot cross-validation results
+plot(fit_ridge)
+```
+```{r}
+fit_ridge2 <- glmnet(x_train, y_train, alpha = 0)
+plot(fit_ridge2, xvar = "lambda")
+```
+
+**Lasso regression**  
+```{r}
+fit_lasso <- cv.glmnet(x_train, y_train, alpha = 1, nfolds = 10)
+```
+```{r}
+yhat_train_lasso <- predict(fit_lasso, x_train, s = fit_lasso$lambda.min) 
+mse_train_lasso <- mean((y_train - yhat_train_lasso)^2)
+mse_train_lasso
+```
+
+```{r}
+yhat_test_lasso <- predict(fit_lasso, x_test, s = fit_lasso$lambda.min) 
+mse_test_lasso <- mean((y_test - yhat_test_lasso)^2)
+mse_test_lasso
+```
+```{r}
+# Plot cross-validation results
+plot(fit_lasso)
+```
+```{r message=FALSE, warning=FALSE}
+fit_lasso2 <- glmnet(x_train, y_train, alpha = 1)
+plot(fit_lasso2, xvar = "lambda")
+```
+
+Trees
+```{r}
+set.seed(666)
+# assign 118 random rows to the test set(around 30% of our dataset)
+test_index2 <- sample(nrow(maindata), 176)
+# now split
+mh.test <- maindata[test_index2,]
+mh.train <- maindata[-test_index2,]
+```
+
+```{r}
+mh_test <- mh.test %>% filter(sample(c(0,1),nrow(mh.test),replace=TRUE,prob=c(0.95,0.05))==1)
+mh_train <- mh.train %>% filter(sample(c(0,1),nrow(mh.train),replace=TRUE,prob=c(0.95,0.05))==1)
+```
+
+```{r}
+y_train2 <- maindata$mh_treatment[-test_index2]
+y_test2 <- maindata$mh_treatment[test_index2]
+```
+
+```{r}
+f1 <- as.formula(mh_treatment ~ age+gender+mh_benefits+tech_company+mh_discuss+company_size)
+```
+
+```{r}
+fit.tree <- rpart(f1, mh_train,
+control = rpart.control(cp = 0.006))
+```
+```{r}
+par(xpd = TRUE)
+plot(fit.tree, compress=TRUE)
+text(fit.tree, use.n=TRUE)
+```
+# ```{r}
+# rpart.plot(fit.tree)
+# ```
+# ```{r}
+# rpart.plot(fit.tree, type = 1)
+# ```
+# ```{r}
+# yhat.train.tree <- predict(fit.tree, mh_train)
+# mse.train.tree <- mean((mh_train$mh_treatment - yhat.train.tree)^2)
+# mse.train.tree
+# ```
+# ```{r}
+# yhat.test.tree <- predict(fit.tree, dd_test)
+# mse.test.tree <- mean((dd_test$shot_made_flag - yhat.test.tree)^2)
+# mse.test.tree
+# ```
+
+```{r}
+##bias-variance tradeoff using trees
+f2 <- as.formula(mh_treatment ~ .)
+```
+```{r}
+set.seed(666)
+x0 <- mh_train[1,]
+mh_train_1 <- mh_train[-1,]
+yhat_small_tree <- c()
+for (i in seq(100)) { 
+  fit_tree <- rpart(f2,
+    mh_train_1 %>% sample_frac(size = .1),
+    control = rpart.control(cp = 0.001))
+  yhat <- predict(fit_tree, x0) 
+  yhat_small_tree <- c(yhat_small_tree, yhat)
+}
+# this is vector of predictions for the big trees
+yhat_big_tree <- c()
+#fit small trees with cp = 0.0001
+for (i in seq(100)) { 
+  fit_tree <- rpart(f2,
+    mh_train_1 %>% sample_frac(size = .1),
+    control = rpart.control(cp = 0.0001)) 
+  yhat <- predict(fit_tree, x0)
+  yhat_big_tree <- c(yhat_big_tree, yhat)
+}
+# make a data frame with the errors from our two trials
+errors <- data.frame(
+  "error"= (x0$mh_treatment - c(yhat_small_tree, yhat_big_tree)),
+  "flexibility"= c(rep("small", length(yhat_small_tree)), rep("big",length(yhat_big_tree))))
+
+# in each plot notice the bias and variance
+ggplot(errors,aes(error)) +geom_density()+facet_grid(flexibility~.)
+```
+```{r}
+fit.tree_2 <- rpart(f2, mh_train,
+control = rpart.control(cp = 0.006))
+```
+```{r}
+par(xpd = TRUE) 
+plot(fit.tree_2, compress=TRUE) 
+text(fit.tree_2, use.n=TRUE)
+```
+```{r}
+rpart.plot(fit.tree_2)
+```
+```{r}
+rpart.plot(fit.tree_2, type = 1)
+```
+```{r}
+yhat.train.tree_2 <- predict(fit.tree_2, mh_train)
+mse.train.tree_2 <- mean((mh_train$mh_treatment - yhat.train.tree_2)^2) 
+mse.train.tree_2
+```
+```{r}
+yhat.test.tree_2 <- predict(fit.tree_2, dd_test)
+mse.test.tree_2 <- mean((mh_test$mh_treatment - yhat.test.tree_2)^2) 
+mse.test.tree_2
+```
+
+***  
+
+##### Random Forests  
+```{r}
+y_train2 <- maindata$mh_treatment[-test_index2]
+y_test2 <- maindata$mh_treatment[test_index2]
+```
+```{r}
+# the [, -1] means take all columns of the matrix except the first column, # which is an intercept added by default
+x1_train <- model.matrix(f1, mh.train2)[, -1]
+x1_test <- model.matrix(f1, mh.test2)[, -1]
+```
+
+```{r}
+fit_rf <- randomForest(f1, dd.train2,
+                  ntree=100,
+                  do.trace=F)
+```
+```{r}
+## Variable Importance Plot
+varImpPlot(fit_rf)
+```
+```{r}
+yhat_rf <- predict(fit_rf, dd.train2) 
+mse_rf_small <- mean((yhat_rf - y_train2) ^ 2) 
+print(mse_rf_small)
+```
+```{r}
+yhat_rf_test <- predict(fit_rf, dd.test2) 
+mse_rf_small_test <- mean((yhat_rf_test - y_test2) ^ 2) 
+print(mse_rf_small_test)
+```
+
+```{r}
+fit_rf2 <- randomForest(f2, mh.train2,
+                  ntree=100,
+                  do.trace=F)
+```
+```{r}
+varImpPlot(fit_rf2)
+```
+```{r}
+yhat_rf2 <- predict(fit_rf2, mh.train2) 
+mse_rf_big <- mean((yhat_rf2 - y_train2) ^ 2) 
+print(mse_rf_big)
+```
+```{r}
+yhat_rf2_test <- predict(fit_rf2, mh.test2) 
+mse_rf_big_test <- mean((yhat_rf2_test - y_test2) ^ 2) 
+print(mse_rf_big_test)
+```
+Notice: We want to get a large tree size in Random Forest 
+
+***
+
+##### Boosted trees  
+```{r}
+fit_btree_small <- gbm(f1, data = mh.train,
+      distribution = "gaussian",
+      n.trees = 100,
+      interaction.depth = 2,
+      shrinkage = 0.001)
+```
+```{r}
+relative.influence(fit_btree_small)
+```
+
+```{r}
+yhat_btree_small <- predict(fit_btree_small, mh.train, n.trees = 100) 
+mse_btree_small <- mean((yhat_btree_small - y_train2) ^ 2) 
+print(mse_btree_small)
+```
+```{r}
+yhat_btree_small_test <- predict(fit_btree_small, mh.test, n.trees = 100) 
+mse_btree_small_test <- mean((yhat_btree_small_test - y_test2) ^ 2) 
+print(mse_btree_small_test)
+```
+
+
+```{r}
+fit_btree_big <- gbm(f2, data = mh.train,
+      distribution = "gaussian",
+      n.trees = 100,
+      interaction.depth = 2,
+      shrinkage = 0.001)
+```
+```{r}
+relative.influence(fit_btree_big)
+```
+
+
+```{r}
+yhat_btree_big <- predict(fit_btree_big, mh.train, n.trees = 100) 
+mse_btree_big <- mean((yhat_btree_big - y_train2) ^ 2) 
+print(mse_btree_big)
+```
+```{r}
+yhat_btree_big_test <- predict(fit_btree_big, mh.test, n.trees = 100) 
+mse_btree_big_test <- mean((yhat_btree_big_test - y_test2) ^ 2) 
+print(mse_btree_big_test)
+```
+
+
