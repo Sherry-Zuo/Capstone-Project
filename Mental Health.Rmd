@@ -517,7 +517,32 @@ witness_mh_nc_percentage <- paste(witness_mh_nc_percentage,"%",sep="") # ad % to
 pie(witness_mh_nc_count,labels = witness_mh_nc_percentage, col=rainbow(length(witness_mh_nc_percentage)),
    main="Whether Witness the Mental Health Negative Consequence")
 ```
+```{r}
+maindata$region <- ifelse(maindata$state %in% c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA"), "NorthEast",
+                           ifelse(maindata$state %in% c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD"),"MidWest",
+                                  ifelse(maindata$state %in% c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR"), "South",
+                                         ifelse(maindata$state %in% c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY","AK", "CA", "HI", "OR", "WA"), "West", NA))))
+```
+```{r}
+w<-table(maindata$region)
+w
+```
+```{r}
+str(w)
+regions_count<-as.vector(w)
+regions_percentage<-names(w)
+regions_count
+regions_percentage
+```
+```{r}
+pct23 <- round(regions_count/sum(regions_count)*100)
+regions_percentage <- paste(regions_percentage, pct22) # add percents to labels
+regions_percentage <- paste(regions_percentage,"%",sep="") # ad % to labels
+pie(regions_count,labels = regions_percentage, col=rainbow(length(regions_percentage)),
+   main="Pie Chart of Regions")
+```
 
+***
 
 Encoding Data
 ```{r}
@@ -570,46 +595,22 @@ skim(dummydata)
 ```
 ```{r}
 #use this for some variable include "I don't know" or "Not sure" and for variable "gender"
-dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph"))
+#also use this for variable regions
+dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph","region"))
 ```
 ```{r}
-#after adding dummies, remove original categorical variables
-dummydata <- dummydata[-c(2,11:17,23)]
+#after adding dummies, remove original categorical variables and state variable
+#leave numeric variables
+dummydata <- dummydata[-c(2:3,11:17,23,25)]
 ```
 ```{r}
-#We would try with state dummys or delete state when we do linear regression
-dummydata<-dummy_cols(dummydata, select_columns = c("state"))
-```
-```{r}
-#leave numeric variables and all dummies with state as dummies
-dummydata<-dummydata[-2]
 dim(dummydata)
 names(dummydata)
 ```
 ```{r}
-#leave numeric variables and all dummies with state as dummies
-dummydata2<-dummydata[-c(41:83)]
-dim(dummydata2)
-names(dummydata2)
+skim(dummydata)
 ```
-```{r}
-maindata2<-maindata
-```
-```{r}
-northeast <- c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA")
 
-midwest <- c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD")
+***
 
-south <- c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR")
-
-west <- c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY", "AK", "CA", "HI", "OR", "WA")
-
-regions<- as.list(northeast, midwest, south, west)
-
-maindata2$region <- ifelse(maindata2$state %in% c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA"), "NorthEast",
-                           ifelse(maindata2$state %in% c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD"),"MidWest",
-                                  ifelse(maindata2$state %in% c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR"), "South",
-                                         ifelse(maindata2$state %in% c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY","AK", "CA", "HI", "OR", "WA"), "West", NA))))
-
-
-table(maindata2$region)
+Model Choosing 
