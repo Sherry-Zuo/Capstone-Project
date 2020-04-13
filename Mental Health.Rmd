@@ -75,43 +75,51 @@ skim(data2014)
 ```{r}
 #make a copy of our data
 maindata<-data2014
-#drop variables "Timestamp", “Country”, “comments” just to make our lives easier.
-maindata<-subset(maindata, select = -c(1,4,27))
+#drop variables "Timestamp", “state”, “comments” just to make our lives easier.
+maindata<-subset(maindata, select = -c(1,5,27))
 ```
 ```{r}
-names(maindata)[1:2]<-c("age","gender")
+#keep columns names in lower case
+names(maindata)[1:3]<-c("age","gender","country")
 ```
 ```{r}
-data.table(maindata)
+maindata=data.table(maindata)
+```
+
+```{r}
+#make word into lowercases in column gender
+maindata$gender<-str_to_lower(maindata$gender)
+#build gender group
+male_str = c("androgyne", "cis male", "cis man", "m", "mail", "maile", "make", "mal", "male", "male (cis)", "male-ish", "malr", "man", "msle", "ostensibly male, unsure what that really means")
+trans_str = c("a little about you", "agender", "all", "enby", "female (trans)", "fluid", "genderqueer", "guy (-ish) ^_^", "male leaning androgynous" , "nah", "neuter", "non-binary", "p", "queer", "queer/she/they", "something kinda male?", "trans woman", "trans-female")          
+female_str = c("cis female", "cis-female/femme", "f", "femail", "femake", "female", "female (cis)", "woman")
+#replace details
+maindata$gender <- ifelse(maindata$gender %in% male_str, "M",ifelse(maindata$gender %in% female_str,"F",ifelse(maindata$gender %in% trans_str,"T",NA)))
+```
+
+```{r}
+#so many countries only have 1 or 2 records, so we only keep countries has more than 10 countries
+maindata %>% 
+   filter(country %in% c('Australia','Canada','France','Germany','India','Ireland','Netherlands','United Kingdom','United States' )) -> maindata
+```
+
+```{r}
+table(maindata$country)
+```
+
+```{r}
+#remove other NAs, 236 interfere and 17 self-employed
+maindata<-na.omit(maindata)
 ```
 
 ```{r}
 skim(maindata)
 ```
 ```{r}
-#make word into lowercases in column gender
-maindata$gender<-str_to_lower(maindata$gender)
-#build gender group
-male_str = c("male", "m", "male-ish", "maile", "mal", "male (cis)", "make", "male ", "man","msle", "mail", "malr","cis man", "Cis Male", "cis male")
-trans_str = c("trans-female", "something kinda male?", "queer/she/they", "non-binary","nah", "all", "enby", "fluid", "genderqueer", "androgyne", "agender", "male leaning androgynous", "guy (-ish) ^_^", "trans woman", "neuter", "female (trans)", "queer", "ostensibly male, unsure what that really means")          
-female_str = c("cis female", "f", "female", "woman",  "femake", "female ","cis-female/femme", "female (cis)", "femail")
-#replace details
-maindata$gender <- ifelse(maindata$gender %in% male_str, "M",ifelse(maindata$gender %in% female_str,"F",ifelse(maindata$gender %in% trans_str,"T",NA)))
-```
-```{r}
-#we want to focus on the US
-maindata<-maindata[!is.na(maindata$state),]
-```
-```{r}
-#remove other NAs
-maindata<-na.omit(maindata)
-```
-```{r}
-skim(maindata)
-```
-```{r}
-#there is one person list 329, so delete this row
+#there is one person list 329, one person list -1726, one person list -1, so delete those rows
 maindata<-maindata[maindata$age!=329,]
+maindata<-maindata[maindata$age!= -1726,]
+maindata<-maindata[maindata$age!=-1,]
 ```
 ```{r}
 names(maindata)
@@ -192,7 +200,7 @@ pie(gender_count,labels = gender_percentage, col=rainbow(length(gender_percentag
    main="Pie Chart of Gender")
 ```
 ```{r}
-#state could make a map, still considering
+#country could make a map in tableau
 ```
 ```{r}
 b=table(maindata$self_employed)
@@ -573,35 +581,31 @@ witness_mh_nc_percentage <- paste(witness_mh_nc_percentage,"%",sep="") # ad % to
 pie(witness_mh_nc_count,labels = witness_mh_nc_percentage, col=rainbow(length(witness_mh_nc_percentage)),
    main="Whether Witness the Mental Health Negative Consequence")
 ```
+
 ```{r}
-maindata$region <- ifelse(maindata$state %in% c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA"), "NorthEast",
-                           ifelse(maindata$state %in% c("IL", "IN", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "SD"),"MidWest",
-                                  ifelse(maindata$state %in% c("DE", "FL", "GA", "MD", "NC", "SC", "VA","DC", "WV", "AL", "KY", "MS", "TN", "TX", "OK", "LA", "AR"), "South",
-                                         ifelse(maindata$state %in% c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY","AK", "CA", "HI", "OR", "WA"), "West", NA))))
-```
-```{r}
-w<-table(maindata$region)
+w<-table(maindata$country)
 w
 ```
 ```{r}
 str(w)
-regions_count<-as.vector(w)
-regions_percentage<-names(w)
-regions_count
-regions_percentage
+country_count<-as.vector(w)
+country_percentage<-names(w)
+country_count
+country_percentage
 ```
 ```{r}
-pct23 <- round(regions_count/sum(regions_count)*100)
-regions_percentage <- paste(regions_percentage, pct22) # add percents to labels
-regions_percentage <- paste(regions_percentage,"%",sep="") # ad % to labels
-pie(regions_count,labels = regions_percentage, col=rainbow(length(regions_percentage)),
-   main="Pie Chart of Regions")
+pct23 <- round(country_count/sum(country_count)*100)
+country_percentage <- paste(country_percentage, pct22) # add percents to labels
+country_percentage <- paste(country_percentage,"%",sep="") # ad % to labels
+pie(country_count,labels = country_percentage, col=rainbow(length(country_percentage)),
+   main="Pie Chart of Countries")
 ```
 ```{r}
-#remove state variable since we want to use regions
-maindata<-maindata[-3]
+dim(maindata)
 ```
-
+```{r}
+#write.csv(maindata,'maindata.csv')
+```
 
 
 Encoding Data
@@ -653,22 +657,28 @@ dummydata$witness_mh_nc<-ifelse(dummydata$witness_mh_nc=="Yes", 1,0)
 ```{r}
 skim(dummydata)
 ```
+
 ```{r}
 #use this for some variable include "I don't know" or "Not sure" and for variable "gender"
 #also use this for variable regions
-dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph","region"))
+dummydata<-dummy_cols(dummydata, select_columns = c("anonymity_protected", "awareness_mh_benefits","gender","medical_leave_easy", "mh_benefits", "mh_discuss", "mh_resources", "mh_serious_ph","country"))
 ```
+
 ```{r}
 #after adding dummies, remove original categorical variables
 #leave numeric variables
-dummydata <- dummydata[-c(2,11:17,23,25)]
+dummydata <- dummydata[-c(2:3,11:16,23)]
 ```
+
 ```{r}
 dim(dummydata)
 names(dummydata)
 ```
 ```{r}
 skim(dummydata)
+```
+```{r}
+#write.csv(dummydata,'dummydata.csv')
 ```
 
 
@@ -685,8 +695,8 @@ corrplot(mh_c,
 Split Dataset    
 ```{r}
 set.seed(666)
-# assign 118 random rows to the test set(around 30% of our dataset)
-test_index <- sample(nrow(dummydata), 176) 
+# assign 270 random rows to the test set(around 30% of our dataset)
+test_index <- sample(nrow(dummydata), 270) 
 # now split
 dummydata.test <- dummydata[test_index,]
 dummydata.train <- dummydata[-test_index,]
@@ -738,7 +748,7 @@ get_mse(forward.model)
 AIC <- as.data.frame(forward.model$anova$AIC)
 names(AIC) <- "AIC"
 AIC %>% 
-    ggvis(x=~ c(1:11), y=~AIC) %>%
+    ggvis(x=~ c(1:10), y=~AIC) %>%
     layer_points(fill = ~ AIC) %>%
     add_axis("y", title = "AIC") %>% 
     add_axis("x", title = "Number of variables")
@@ -765,7 +775,7 @@ get_mse(backward.model)
 AIC2 <- as.data.frame(backward.model$anova$AIC)
 names(AIC2) <- "AIC2"
 AIC2 %>% 
-    ggvis(x=~ c(1:32), y=~AIC2 ) %>%
+    ggvis(x=~ c(1:41), y=~AIC2 ) %>%
     layer_points(fill = ~ desc(AIC2)) %>%
     add_axis("y", title = "AIC") %>% 
     add_axis("x", title = "Number of variables eliminated")
