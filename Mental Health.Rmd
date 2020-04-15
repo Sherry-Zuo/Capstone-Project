@@ -845,72 +845,76 @@ fit_lasso2 <- glmnet(x_train, y_train, alpha = 1)
 plot(fit_lasso2, xvar = "lambda")
 ```
 
-<!-- Trees -->
-<!-- ```{r} -->
-<!-- set.seed(666) -->
-<!-- # assign 118 random rows to the test set(around 30% of our dataset) -->
-<!-- test_index2 <- sample(nrow(maindata), 176) -->
-<!-- # now split -->
-<!-- mh.test <- maindata[test_index2,] -->
-<!-- mh.train <- maindata[-test_index2,] -->
-<!-- ``` -->
+Trees
+```{r}
+set.seed(666)
+# now split
+mh.test <- maindata[test_index,]
+mh.train <- maindata[-test_index,]
+```
 
-<!-- ```{r} -->
-<!-- mh_test <- mh.test %>% filter(sample(c(0,1),nrow(mh.test),replace=TRUE,prob=c(0.95,0.05))==1) -->
-<!-- mh_train <- mh.train %>% filter(sample(c(0,1),nrow(mh.train),replace=TRUE,prob=c(0.95,0.05))==1) -->
-<!-- ``` -->
+```{r}
+mh_test <- mh.test %>% filter(sample(c(0,1),nrow(mh.test),replace=TRUE,prob=c(0.95,0.05))==1)
+mh_train <- mh.train %>% filter(sample(c(0,1),nrow(mh.train),replace=TRUE,prob=c(0.95,0.05))==1)
+```
 
-<!-- ```{r} -->
-<!-- y_train2 <- maindata$mh_treatment[-test_index2] -->
-<!-- y_test2 <- maindata$mh_treatment[test_index2] -->
-<!-- ``` -->
+```{r}
+y_train2 <- maindata$mh_treatment[-test_index]
+y_test2 <- maindata$mh_treatment[test_index]
+```
 
-<!-- ```{r} -->
-<!-- f1 <- as.formula(mh_treatment ~ age+gender+mh_benefits+tech_company+mh_discuss+company_size) -->
-<!-- ``` -->
+```{r}
+f1 <- as.formula(mh_treatment ~ age+gender+country+tech_company+mh_discuss+company_size+remote+medical_leave_easy+family_history)
+```
 
-<!-- ```{r} -->
-<!-- fit.tree <- rpart(f1, mh_train, -->
-<!-- control = rpart.control(cp = 0.006)) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- par(xpd = TRUE) -->
-<!-- plot(fit.tree, compress=TRUE) -->
-<!-- text(fit.tree, use.n=TRUE) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- rpart.plot(fit.tree) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- rpart.plot(fit.tree, type = 1) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- yhat.train.tree <- predict(fit.tree, mh_train) -->
-<!-- mse.train.tree <- mean((mh_train$mh_treatment - yhat.train.tree)^2) -->
-<!-- mse.train.tree -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- yhat.test.tree <- predict(fit.tree, dd_test) -->
-<!-- mse.test.tree <- mean((dd_test$shot_made_flag - yhat.test.tree)^2) -->
-<!-- mse.test.tree -->
-<!--  ``` -->
+```{r}
+fit.tree <- rpart(f1, mh_train,
+control = rpart.control(cp = 0.006))
+```
 
-<!-- ```{r} -->
-<!-- ##bias-variance tradeoff using trees -->
-<!-- f2 <- as.formula(mh_treatment ~ .) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- set.seed(666) -->
-<!-- x0 <- mh_train[1,] -->
-<!-- mh_train_1 <- mh_train[-1,] -->
-<!-- yhat_small_tree <- c() -->
-<!-- for (i in seq(100)) { -->
-<!--   fit_tree <- rpart(f2, -->
-<!--     mh_train_1 %>% sample_frac(size = .1), -->
-<!--     control = rpart.control(cp = 0.001)) -->
-<!--   yhat <- predict(fit_tree, x0) -->
-<!--   yhat_small_tree <- c(yhat_small_tree, yhat) -->
-<!-- } -->
+```{r}
+par(xpd = TRUE)
+plot(fit.tree, compress=TRUE)
+text(fit.tree, use.n=TRUE)
+```
+
+```{r}
+rpart.plot(fit.tree)
+```
+
+```{r}
+rpart.plot(fit.tree, type = 1)
+```
+
+```{r}
+# yhat.train.tree <- predict(fit.tree, mh_train)
+# mse.train.tree <- mean((mh_train$mh_treatment - yhat.train.tree)^2)
+# mse.train.tree
+```
+
+```{r}
+# yhat.test.tree <- predict(fit.tree, mh_test)
+# mse.test.tree <- mean((mh_test$mh_treatment - yhat.test.tree)^2)
+# mse.test.tree
+```
+
+```{r}
+##bias-variance tradeoff using trees
+# f2 <- as.formula(mh_treatment ~ .)
+```
+
+```{r}
+# set.seed(666)
+# x0 <- mh_train[1,]
+# mh_train_1 <- mh_train[-1,]
+# yhat_small_tree <- c()
+# for (i in seq(100)) {
+#   fit_tree <- rpart(f2,
+#     mh_train_1 %>% sample_frac(size = .1),
+#     control = rpart.control(cp = 0.001))
+#   yhat <- predict(fit_tree, x0)
+#   yhat_small_tree <- c(yhat_small_tree, yhat)
+# }
 <!-- # this is vector of predictions for the big trees -->
 <!-- yhat_big_tree <- c() -->
 <!-- #fit small trees with cp = 0.0001 -->
