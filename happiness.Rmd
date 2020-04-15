@@ -1,0 +1,115 @@
+---
+title: "happiness"
+author: "Leighton Li"
+date: "4/14/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(lubridate)
+library(data.table)
+library(skimr)
+library(tidytext)
+```
+
+```{r include=FALSE}
+setwd("~/Desktop/CAPSTONE/Capstone-Project")
+maindata = read_csv("maindata.csv")
+maindata = as.data.frame(maindata)
+glimpse(maindata)
+unique(maindata$country)
+
+h2015 = read_csv("2015.csv")
+h2016 = read_csv("2016.csv")
+h2017 = read_csv("2017.csv")
+```
+
+```{r include=FALSE}
+unique(maindata$country)
+
+h2015 = as.data.frame(h2015)
+glimpse(h2015)
+names(h2015)[names(h2015)=="Country"] = "country"
+length(unique(h2015$country))
+colnames(h2015)
+
+h2016 = as.data.frame(h2016)
+glimpse(h2016)
+names(h2016)[names(h2016)=="Country"] = "country"
+length(unique(h2016$country))
+colnames(h2016)
+
+h2017 = as.data.frame(h2017)
+glimpse(h2017)
+names(h2017)[names(h2017)=="Country"] = "country"
+length(unique(h2017$country))
+colnames(h2017)
+```
+
+```{r}
+h5 = h2015[, c(1,3:4,6,8,9)]
+h6 = h2016[, c(1,3:4,7,9:10)]
+h7 = h2017[, c(1:3,6,8,9)]
+
+h5$h_year = 2015
+h6$h_year = 2016
+h7$h_year = 2017
+colnames(h5) <- c("h_country", "h_rank", "h_score", "gdp_capita","life_exp", "freedom", "h_year")
+colnames(h6) <- c("h_country", "h_rank", "h_score", "gdp_capita","life_exp", "freedom", "h_year")
+colnames(h7) <- c("h_country", "h_rank", "h_score", "gdp_capita","life_exp", "freedom", "h_year")
+```
+
+```{r}
+h_combined = rbind(h5, h6)
+h_combined = rbind(h_combined, h7)
+```
+
+** suicide rate **
+```{r include=FALSE}
+s = read_csv("~/Desktop/CAPSTONE/Capstone-Project/who_suicide_statistics.csv")
+```
+
+```{r}
+yr = c(2015, 2016, 2017)
+s = s %>% filter(year==yr)
+s2 = na.omit(s)
+```
+
+```{r}
+s3 = s2 %>% group_by(country, year, sex) %>% summarise(suicides_no = sum(suicides_no),
+                                                  population = sum(population))
+s3$s_percentage = s3$suicides_no/s3$population
+s3$s_percentage = s3$s_percentage * 100
+```
+
+```{r}
+s_country = s2 %>% group_by(country, year) %>% summarise(suicides_no = sum(suicides_no),
+                                                  population = sum(population))
+s_country$percentage = s_country$suicides_no / s_country$population
+s_country$percentage = s_country$percentage * 100
+s_country = s_country %>% filter(year==2015)
+s_country$country[s_country$country=='United States of America'] = "United States"
+
+h_country = h_combined %>% filter(h_year==2015)
+h_country$country = h_country$h_country
+```
+
+```{r}
+s_h = merge(s_country, h_country, by='country', how='left')
+s_h = s_h[,-c(6,12)]
+
+write.csv(s_h, "suicide_happiness_2015.csv")
+write.csv(h_country, "happiness_2015.csv")
+write.csv(s_country, "suicide_2015.csv")
+```
+
