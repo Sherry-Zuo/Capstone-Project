@@ -1,17 +1,18 @@
 ---
 title: "Mental Health"
+subtitle: "Capstone Project"
 author: 'Cohort B: Alvaro Chinchayan, Leighton Li, Andrey Lifar, Yoki Liu, Yue Ping, Sherry Zuo'
-subtitle: Capstone Project
 date: "2/27/2020"
 output:
   pdf_document:
     latex_engine: xelatex
+subtitle: Capstone Project
 ---
 
 Our main goal is to answer questions for:    
 What's the overview of people's mental health problem?     
 Can you predict whether a patient should be treated of his/her mental illness or not according to the value obtained based on our data?     
-Is there a correlation between mental health and whether job lets them take them break/ alow them to work from home/remote worker?    
+Is there a correlation between mental health and whether job lets them take them break / alow them to work from home /remote worker?    
 What can we get for the tweets' data? 
 
 
@@ -44,13 +45,14 @@ library(leaps)
 library(ggvis)
 library(dvmisc)
 ```
-Our first part will focus on the [OSMI Mental Health in Tech Surveys data](https://osmihelp.org/research)  
+
+Our first part will focus on the OSMI Mental Health in Tech Surveys data (https://osmihelp.org/research)  
 We merged 2016-2019 data into a new dataset by python, more code could see in the Mental_Health.ipynb file. We will use the merged dataset "mental_health" to do an overview of the mental illness    
 We will do supervised machine learning focus on the year 2014 data  
 
 
 Data Loading  
-```{r}
+```{r message=FALSE, warning=FALSE}
 #import data
 data<-read_csv("~/Desktop/mental_health.csv")
 data2014<-read_csv("~/Desktop/2014.csv")
@@ -692,6 +694,7 @@ corrplot(mh_c,
          method="color",
          order="hclust")
 ```
+
 Split Dataset    
 ```{r}
 set.seed(666)
@@ -702,8 +705,10 @@ dummydata.test <- dummydata[test_index,]
 dummydata.train <- dummydata[-test_index,]
 ```
 
-Linear Regression 
-**Preparation**
+
+Linear Regression   
+
+Preparation
 ```{r}
 # Intercept
 intercept <- lm(mh_treatment ~ 1, data=dummydata.train)
@@ -733,8 +738,10 @@ full.model.test <- lm(mh_treatment ~., data = dummydata.test)
 get_mse(full.model.test, var.estimate = FALSE)
 ```
 
+
 Stepwise Regression
-**Forward Selection** 
+
+Forward Selection 
 ```{r echo=T, results='hide'}
 forward.model <- stepAIC(intercept, direction = "forward", scope=list(upper=full.model, lower=intercept))
 ```
@@ -761,7 +768,7 @@ mse_test_forward <- mean((dummydata.test$mh_treatment-yhat_test_forward)^2)
 mse_test_forward
 ```
 
-**Backward Selection**
+Backward Selection
 ```{r echo=T, results='hide'}
 backward.model <- stepAIC(full.model, direction = "backward")
 ```
@@ -788,9 +795,8 @@ mse_test_backward <- mean((dummydata.test$mh_treatment-yhat_test_backward)^2)
 mse_test_backward
 ```
 
-***
 
-##### Penalized regression
+Penalized regression
 ```{r}
 x_data <- model.matrix( ~ -1 + . -mh_treatment, dummydata)
 x_train <- x_data[-test_index, ]
@@ -798,7 +804,8 @@ y_train <- dummydata$mh_treatment[-test_index]
 x_test <- x_data[test_index, ]
 y_test <- dummydata$mh_treatment[test_index]
 ```
-**Ridge regression**    
+
+Ridge regression   
 ```{r}
 fit_ridge <- cv.glmnet(x_train, y_train, alpha = 0, nfolds = 10)
 ```
@@ -821,7 +828,7 @@ fit_ridge2 <- glmnet(x_train, y_train, alpha = 0)
 plot(fit_ridge2, xvar = "lambda")
 ```
 
-**Lasso regression**  
+Lasso regression  
 ```{r}
 fit_lasso <- cv.glmnet(x_train, y_train, alpha = 1, nfolds = 10)
 ```
@@ -848,6 +855,87 @@ plot(fit_lasso2, xvar = "lambda")
 More machine learning will in the python notebook.
 
 
+```{r}
+table(maindata$country)
+```
+
+```{r message=FALSE, warning=FALSE}
+#import happiness and suicide data
+bigger<-read_csv("suicide_happiness_2015.csv")
+```
+```{r}
+#remove first column since it's just the numbers of row
+bigger<-bigger[,2:11]
+```
+
+```{r}
+head(bigger)
+```
+
+```{r}
+newdata<-maindata%>%
+   mutate(mhtreatment=ifelse(mh_treatment=="Yes", 1, 0))%>%
+   group_by(country)%>%
+   summarize(treatment=mean(mhtreatment))
+newdata
+```
+
+```{r message=FALSE, warning=FALSE}
+happiness<-read_csv("happiness_2015.csv")
+```
+
+```{r}
+head(happiness)
+```
+```{r}
+#leave useful countries
+happiness<-happiness[,c(4,5,6,7,9)]
+```
+```{r}
+head(happiness)
+```
+```{r}
+newdata <- merge(x=newdata, y=happiness, by="country")
+```
+```{r}
+newdata
+```
+```{r message=FALSE, warning=FALSE}
+suicide<-read_csv("suicide_2015.csv")
+```
+```{r}
+head(suicide)
+```
+```{r}
+suicide<-suicide[, c(2,4,5,6)]
+```
+```{r}
+names(suicide)[4]<-"suicide_rate"
+```
+```{r}
+head(suicide)
+```
+
+```{r}
+newdata <- merge(x=newdata, y=suicide, by="country")
+```
+```{r}
+newdata
+```
+```{r}
+#transfer suicide rate to %
+newdata<-
+   newdata%>%
+   mutate(suicide_rate=suicide_rate*100)
+```
+
+```{r}
+newdata
+```
+
+```{r}
+summary(lm(treatment~h_score+suicide_rate, data=newdata))
+```
 
 
 
