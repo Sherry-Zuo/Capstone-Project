@@ -145,7 +145,7 @@ maindata%>%
 #   geom_text(aes(label = n))
 ```
 ```{r}
-maindata%>%
+chart1<-maindata%>%
    mutate(mh_treatment=ifelse(mh_treatment=="Yes", 1, 0))%>%
    group_by(interfere, gender)%>%
    summarize(proportion = sum(mh_treatment)/length(mh_treatment))%>%
@@ -153,12 +153,12 @@ maindata%>%
               y=proportion, fill=gender))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Work Interfere", y="Probability", 
-           title="Probility of Mental Health Interfere based on Gender")+
+           title="Probability of Mental Health Interfere based on Gender")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
 ```
 ```{r}
-maindata%>%
+chart2<-maindata%>%
    mutate(mh_treatment=ifelse(mh_treatment=="Yes", 1, 0))%>%
    group_by(company_size, tech_company)%>%
    summarize(proportion = sum(mh_treatment)/length(mh_treatment))%>%
@@ -166,21 +166,24 @@ maindata%>%
               y=proportion, fill=tech_company))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Company Size", y="Probability", 
-           title="Probility of Mental Health Company Size base on Tech")+
+           title="Probability of Mental Health Company Size base on Tech")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
 ```
 ```{r}
-maindata%>%
+chart3<-maindata%>%
    mutate(mh_treatment=ifelse(mh_treatment=="Yes", 1, 0))%>%
    group_by(medical_leave_easy, remote)%>%
    summarize(proportion = sum(mh_treatment)/length(mh_treatment))%>%
    ggplot(aes(x=factor(medical_leave_easy, levels=c("Don't know","Very difficult","Somewhat difficult","Somewhat easy","Very easy")), y=proportion, fill=remote))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Leave Easy", y="Probability", 
-           title="Probility of Mental Health Leave Easy based on remote")+
+           title="Probability of Mental Health Leave Easy based on remote")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
+```
+```{r}
+grid.arrange(chart1,chart2,chart3)
 ```
 
 ```{r}
@@ -874,10 +877,13 @@ head(bigger)
 
 ```{r}
 newdata<-maindata%>%
-   mutate(mhtreatment=ifelse(mh_treatment=="Yes", 1, 0))%>%
-   group_by(country)%>%
-   summarize(treatment=mean(mhtreatment))
-newdata
+   mutate(mh_treatment=ifelse(mh_treatment=="Yes", 1, 0))
+head(newdata)
+```
+```{r}
+#leave useful columns
+newdata<-newdata[,c(3,6)]
+head(newdata)
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -888,7 +894,7 @@ happiness<-read_csv("happiness_2015.csv")
 head(happiness)
 ```
 ```{r}
-#leave useful countries
+#leave useful columns
 happiness<-happiness[,c(4,5,6,7,9)]
 ```
 ```{r}
@@ -898,7 +904,7 @@ head(happiness)
 newdata <- merge(x=newdata, y=happiness, by="country")
 ```
 ```{r}
-newdata
+head(newdata)
 ```
 ```{r message=FALSE, warning=FALSE}
 suicide<-read_csv("suicide_2015.csv")
@@ -934,8 +940,14 @@ newdata
 ```
 
 ```{r}
-summary(lm(treatment~h_score+suicide_rate, data=newdata))
+summary(lm(mh_treatment~h_score+suicide_rate, data=newdata))
+```
+```{r}
+dim(maindata)
 ```
 
+```{r}
+names(maindata)
+```
 
 
