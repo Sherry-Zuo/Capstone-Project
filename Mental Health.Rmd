@@ -100,6 +100,11 @@ maindata$gender <- ifelse(maindata$gender %in% male_str, "M",ifelse(maindata$gen
 ```
 
 ```{r}
+#switch to tableau for country overview
+#write.csv(maindata,'countrydata.csv')
+```
+
+```{r}
 #so many countries only have 1 or 2 records, so we only keep countries has more than 10 countries
 maindata %>% 
    filter(country %in% c('Australia','Canada','France','Germany','India','Ireland','Netherlands','United Kingdom','United States' )) -> maindata
@@ -153,7 +158,7 @@ chart1<-maindata%>%
               y=proportion, fill=gender))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Work Interfere", y="Probability", 
-           title="Probability of Mental Health Interfere based on Gender")+
+           title="Probability of Mental Health via Interfere based on Gender")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
 ```
@@ -166,7 +171,7 @@ chart2<-maindata%>%
               y=proportion, fill=tech_company))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Company Size", y="Probability", 
-           title="Probability of Mental Health Company Size base on Tech")+
+           title="Probability of Mental Health via Company Size base on Tech")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
 ```
@@ -178,7 +183,7 @@ chart3<-maindata%>%
    ggplot(aes(x=factor(medical_leave_easy, levels=c("Don't know","Very difficult","Somewhat difficult","Somewhat easy","Very easy")), y=proportion, fill=remote))+
       geom_bar(position = 'dodge', stat = 'identity')+
       labs(x="Leave Easy", y="Probability", 
-           title="Probability of Mental Health Leave Easy based on remote")+
+           title="Probability of Mental Health via Leave Easy based on remote")+
       theme(panel.background = element_rect(fill="transparent"),
         axis.line = element_line(colour = "black"))
 ```
@@ -858,6 +863,7 @@ plot(fit_lasso2, xvar = "lambda")
 More machine learning will in the python notebook.
 
 
+Regression
 ```{r}
 table(maindata$country)
 ```
@@ -901,10 +907,10 @@ happiness<-happiness[,c(4,5,6,7,9)]
 head(happiness)
 ```
 ```{r}
-newdata <- merge(x=newdata, y=happiness, by="country")
+regression_data <- merge(x=newdata, y=happiness, by="country")
 ```
 ```{r}
-head(newdata)
+head(regression_data)
 ```
 ```{r message=FALSE, warning=FALSE}
 suicide<-read_csv("suicide_2015.csv")
@@ -923,15 +929,15 @@ head(suicide)
 ```
 
 ```{r}
-newdata <- merge(x=newdata, y=suicide, by="country")
+regression_data <- merge(x=regression_data, y=suicide, by="country")
 ```
 ```{r}
 newdata
 ```
 ```{r}
 #transfer suicide rate to %
-newdata<-
-   newdata%>%
+regression_data<-
+   regression_data%>%
    mutate(suicide_rate=suicide_rate*100)
 ```
 
@@ -940,14 +946,12 @@ newdata
 ```
 
 ```{r}
-summary(lm(mh_treatment~h_score+suicide_rate, data=newdata))
-```
-```{r}
-dim(maindata)
+summary(lm(mh_treatment~h_score+suicide_rate, data=regression_data))
 ```
 
 ```{r}
-names(maindata)
+#write.csv(newdata,'newdata.csv')
 ```
+
 
 
