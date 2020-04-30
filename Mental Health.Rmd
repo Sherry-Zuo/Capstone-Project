@@ -953,5 +953,59 @@ summary(lm(mh_treatment~h_score+suicide_rate, data=regression_data))
 #write.csv(newdata,'newdata.csv')
 ```
 
+## Regression: Suicide Rate ~ Happiness Score Data
+```{r}
+mod1 = lm(suicides_no ~ population + h_score + gdp_capita + life_exp + freedom, data = bigger)
+summary(mod1)
+# Included population as an explanatory variable. ** Life exp is significant. **
+```
+
+```{r}
+mod2 = lm(percentage ~ h_score + gdp_capita + life_exp + freedom, data = bigger)
+summary(mod2)
+# Included suicide rate as the y. nothing stat. significant. 
+# GDP per capita has a negative relationship which needs explanation. **
+# Freedom as well. need explanations. 
+## Guess: not actual life exp or degree of freedom but rather a "factor" number. 
+```
+
+```{r}
+mod2_proof = lm(h_score ~ gdp_capita + life_exp + freedom, data = bigger)
+summary(mod2_proof)
+# all significant.
+```
+## Shouldn't include other factors from these two datasets except for SUICIDE RATE & HAPPINESS SCORE. 
+
+## Regression: Mental Health Variables + S + H
+```{r}
+as.data.frame(maindata)
+mh_reg = maindata[,c("age", "gender", "country", "family_history", "mh_treatment",
+                     "tech_company", "mh_benefits", "mh_resources")]
+mh_reg = merge(mh_reg, suicide, by="country")
+mh_reg = merge(mh_reg, happiness, by="country")
+mh_reg = mh_reg[,-c(9:10, 13:15)]
+mh_reg = mh_reg %>% mutate(age = ifelse(age<=24, 1, 
+                                        ifelse(age>24 & age<=35, 2, 
+                                               ifelse(age>35 & age<=45, 3,
+                                                      ifelse(age>45 & age<=55, 4,
+                                                             ifelse(age>55, 5, 6))))))
+mh_reg2 = dummy_cols(mh_reg, c("gender", "country", "family_history",
+                     "tech_company", "mh_benefits", "mh_resources"))
+mh_reg2 = mh_reg2[,c(2,5,9:11,19,23,26)]
+#mh_reg2 = mh_reg2[,c(2,5,9:28)]
+mh_reg2$mh_treatment = ifelse(mh_reg2$mh_treatment=="Yes", 1, 0)
+```
+
+```{r}
+mod3 = lm(mh_treatment ~ ., data=mh_reg2)
+summary(mod3)
+```
+
+```{r}
+#install.packages("olsrr")
+library(olsrr)
+ols_step_both_p(mod3)
+```
+
 
 
