@@ -5,7 +5,8 @@ author: 'Cohort B: Alvaro Chinchayan, Leighton Li, Andrey Lifar, Yoki Liu, Yue P
 date: "5/1/2020"
 output:
   pdf_document:
-    latex_engine: xelatex
+     latex_engine: xelatex
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
