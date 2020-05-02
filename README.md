@@ -1,7 +1,7 @@
 # Capstone-Project
 ## Mental Health in Workplace  
 
-An exploration on people’s mental health, specifically in a corporate environment.
+Explore on people’s mental health, specifically in a corporate environment.
 
 Utilize survey data from a non-profit organization and build machine learning models to:
 Predict if an employee has sought treatment for his/her mental health condition. 
